@@ -16,7 +16,7 @@
     "react-dom": "19.2.3"
   },
   "devDependencies": {
-    "@supabase/supabase-js": "^2.93.3",
+    "@supabase/supabase-js": "^2.94.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

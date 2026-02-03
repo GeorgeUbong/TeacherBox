@@ -1,9 +1,15 @@
 "use client"
-import react, { useState } from 'react';
+import React, { useState } from 'react';
 import Sidebar from '../components/SideBar';
 import LessonUp from './dashcomponents/Uploads';
 import Users from './dashcomponents/users';
 import RecentUploads from './dashcomponents/RecentUploads';
+import { createClient } from '@/utils/supabase/client';
+import { Suspense } from "react";
+
+
+
+
 
 export default function Dash() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -43,7 +49,7 @@ export default function Dash() {
 
             {/* Sidebar with mobile toggle */}
             <div
-                className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform sm:relative sm:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform sm:sticky sm:translate-x-0 shrink-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
                 <Sidebar hideMobileButton isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
@@ -71,6 +77,8 @@ export default function Dash() {
                     {/* Recent uploads table (placeholder) */}
                     <section className="mt-8">
                         <RecentUploads />
+
+
                     </section>
 
                     <section>

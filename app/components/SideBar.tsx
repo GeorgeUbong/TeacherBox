@@ -1,7 +1,7 @@
 // components/Sidebar.tsx
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -13,10 +13,26 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import img from '../assets/logo.png'
+import { createClient } from '@/utils/supabase/client'
 
 export default function Sidebar({ hideMobileButton = false, isSidebarOpen = false, setIsSidebarOpen }: { hideMobileButton?: boolean; isSidebarOpen?: boolean; setIsSidebarOpen?: (state: boolean) => void }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+    const [grades, setGrades] = useState<any[]>([])
     const pathname = usePathname()
+    const supabase = createClient()
+
+    useEffect(() => {
+        const fetchGrades = async () => {
+            const { data, error } = await supabase
+                .from('grades')
+                .select('*')
+                .order('order_index', { ascending: true })
+            if (data) {
+                setGrades(data)
+            }
+        }
+        fetchGrades()
+    }, [])
 
     return (
         <>
@@ -51,7 +67,7 @@ export default function Sidebar({ hideMobileButton = false, isSidebarOpen = fals
 
             <aside
                 id="sidebar-multi-level-sidebar"
-                className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform bg-white text-black border-r border-default ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} sm:translate-x-0`}
+                className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform bg-white text-[#267CD1] border-r border-default ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} sm:translate-x-0`}
                 aria-label="Sidebar"
             >
                 <div className="h-full px-3 py-4 overflow-hidden flex flex-col">
@@ -69,8 +85,8 @@ export default function Sidebar({ hideMobileButton = false, isSidebarOpen = fals
                             <Link
                                 href="/dashboard"
                                 className={`flex items-center px-2 py-1.5 text-body rounded-base transition-colors ${pathname === '/dashboard'
-                                        ? 'bg-blue-100 text-blue-600 font-semibold'
-                                        : 'hover:bg-neutral-tertiary hover:text-fg-brand group'
+                                    ? 'bg-blue-100 text-blue-600 font-semibold'
+                                    : 'hover:bg-neutral-tertiary hover:text-fg-brand group'
                                     }`}
                             >
                                 <LayoutDashboard className="w-5 h-5 transition duration-75" />
@@ -99,30 +115,17 @@ export default function Sidebar({ hideMobileButton = false, isSidebarOpen = fals
                                 id="dropdown-example"
                                 className={`py-2 space-y-2 ${isDropdownOpen ? 'block' : 'hidden'}`}
                             >
-                                <li>
-                                    <Link
-                                        href="#"
-                                        className="flex items-center pl-10 px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
-                                    >
-                                        Jss 1
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        href="#"
-                                        className="flex items-center pl-10 px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
-                                    >
-                                        Jss 2
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        href="#"
-                                        className="flex items-center pl-10 px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
-                                    >
-                                        Jss 3
-                                    </Link>
-                                </li>
+
+                                {grades.map((grade) => (
+                                    <li key={grade.id}>
+                                        <Link
+                                            href={`/grades?id=${grade.id}`}
+                                            className="flex items-center pl-10 px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
+                                        >
+                                            {grade.name}
+                                        </Link>
+                                    </li>
+                                ))}
                             </ul>
                         </li>
 
