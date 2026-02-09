@@ -14,7 +14,7 @@ interface LessonCardProps {
 
 export default function LessonCard({ id, title, content, type = 'video', onEdit }: LessonCardProps) {
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 relative hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-300 p-6 relative hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-4">
                 {/* Icon Placeholder */}
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center ${type === 'video' ? 'bg-red-100 text-red-500' : 'bg-blue-100 text-blue-500'}`}>
@@ -27,7 +27,7 @@ export default function LessonCard({ id, title, content, type = 'video', onEdit 
                         e.preventDefault();
                         onEdit?.();
                     }}
-                    className="bg-gray-100 text-gray-600 text-xs font-medium px-3 py-1 rounded-full hover:bg-gray-200 transition-colors"
+                    className="bg-orange-500 text-white text-xs font-medium px-3 py-1 rounded-full hover:bg-gray-200 transition-colors"
                 >
                     Edit
                 </button>
@@ -41,7 +41,7 @@ export default function LessonCard({ id, title, content, type = 'video', onEdit 
 
             <Link
                 href={`/lessonview?id=${id}`}
-                className="flex items-center text-blue-600 font-medium text-sm hover:text-blue-700 group"
+                className="flex items-center text-[#267CD1] font-bold text-sm hover:text-blue-700 group"
             >
                 View Lesson
                 <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />

@@ -14,10 +14,13 @@ function GradeContent() {
     const [gradeName, setGradeName] = useState<string>('');
     const [subjects, setSubjects] = useState<any[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingSubject, setEditingSubject] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
     const supabase = createClient();
 
     const fetchGradeAndSubjects = async () => {
         if (!id) return;
+        setIsLoading(true);
 
         // Fetch Grade Name
         const { data: gradeData } = await supabase
@@ -40,46 +43,73 @@ function GradeContent() {
         if (subjectsData) {
             setSubjects(subjectsData);
         }
+        setIsLoading(false);
     };
 
     useEffect(() => {
         fetchGradeAndSubjects();
     }, [id]);
 
+    const handleEdit = (subject: any) => {
+        setEditingSubject(subject);
+        setIsModalOpen(true);
+    };
+
+    const handleAddNew = () => {
+        setEditingSubject(null);
+        setIsModalOpen(true);
+    };
+
     return (
         <div className="p-6 md:p-12 w-full">
             <div className="flex justify-between items-start mb-8">
                 <div>
-                    <h2 className="text-3xl font-bold text-blue-600 mb-2">{gradeName}</h2>
-                    <p className="text-blue-500 font-medium">Subjects</p>
+                    <h2 className="text-3xl font-bold text-[#267CD1] mb-2">{gradeName}</h2>
+                    <p className="text-[#267CD1] font-medium">Subjects</p>
                 </div>
 
                 <button
-                    className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-full hover:bg-blue-700 transition-colors font-medium shadow-sm hover:shadow-md"
-                    onClick={() => setIsModalOpen(true)}
+                    className="flex items-center gap-1 md:gap-2 bg-[#267CD1] 
+               text-white px-4 py-1.5 md:px-6 md:py-2.5 
+               text-sm md:text-base rounded-full 
+               hover:bg-blue-700 transition-colors 
+               font-medium shadow-sm hover:shadow-md"
+                    onClick={handleAddNew}
                 >
                     Upload New Subject
                     <Plus className="w-5 h-5" strokeWidth={2.5} />
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {subjects.map((subject) => (
-                    <SubjectCard
-                        key={subject.id}
-                        id={subject.id}
-                        title={subject.title}
-                        description={subject.subtext}
-                        onEdit={() => console.log('Edit subject', subject.id)}
-                    />
-                ))}
-            </div>
+            {isLoading ? (
+                <div className="loader-wrapper">
+                    <div className="loader">
+                        <div className="jimu-primary-loading" />
+                    </div>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {subjects.map((subject) => (
+                        <SubjectCard
+                            key={subject.id}
+                            id={subject.id}
+                            title={subject.title}
+                            description={subject.subtext}
+                            onEdit={() => handleEdit(subject)}
+                        />
+                    ))}
+                </div>
+            )}
 
             {id && (
                 <CreateSubjectModal
                     isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
+                    onClose={() => {
+                        setIsModalOpen(false);
+                        setEditingSubject(null);
+                    }}
                     gradeId={id}
+                    initialData={editingSubject}
                     onSuccess={() => {
                         fetchGradeAndSubjects();
                     }}
@@ -100,7 +130,7 @@ export default function GradePage() {
             <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                 type="button"
-                className={`fixed top-4 left-4 z-50 inline-flex items-center p-2 sm:hidden bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-opacity ${isSidebarOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+                className={`fixed top-4 left-4 z-50 inline-flex items-center p-2 sm:hidden bg-[#267CD1] text-white rounded-lg hover:bg-blue-600 transition-opacity ${isSidebarOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
             >
                 <span className="sr-only">Open sidebar</span>
                 <svg

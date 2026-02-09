@@ -13,7 +13,7 @@ interface TopicCardProps {
 
 export default function TopicCard({ id, title, subtopic, onEdit }: TopicCardProps) {
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 relative hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-300 p-6 relative hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-4">
                 {/* Icon Placeholder */}
                 <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500">
@@ -26,7 +26,7 @@ export default function TopicCard({ id, title, subtopic, onEdit }: TopicCardProp
                         e.preventDefault();
                         onEdit?.();
                     }}
-                    className="bg-blue-500 text-white text-xs font-medium px-3 py-1 rounded-full hover:bg-blue-600 transition-colors"
+                    className="bg-orange-500 text-white text-xs font-medium px-3 py-1 rounded-full hover:bg-blue-600 transition-colors"
                 >
                     Edit Topic
                 </button>
@@ -40,7 +40,7 @@ export default function TopicCard({ id, title, subtopic, onEdit }: TopicCardProp
 
             <Link
                 href={`/lessons?topicId=${id}`}
-                className="flex items-center text-blue-600 font-medium text-sm hover:text-blue-700 group"
+                className="flex items-center text-[#267CD1] font-bold text-sm hover:text-blue-700 group"
             >
                 View Content
                 <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />

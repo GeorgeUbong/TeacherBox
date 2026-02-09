@@ -11,8 +11,10 @@ function LessonContent() {
     const searchParams = useSearchParams();
     const topicId = searchParams.get('topicId');
     const [topicTitle, setTopicTitle] = useState<string>('');
+    const [hierarchy, setHierarchy] = useState<{ grade: string, subject: string } | null>(null);
     const [lessons, setLessons] = useState<any[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingLesson, setEditingLesson] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const supabase = createClient();
 
@@ -23,12 +25,32 @@ function LessonContent() {
         // Fetch Topic Title
         const { data: topicData } = await supabase
             .from('topics')
-            .select('title')
+            .select('title, subject_id')
             .eq('id', topicId)
             .single();
 
         if (topicData) {
             setTopicTitle(topicData.title);
+
+            // Fetch subject and grade
+            const { data: subjectData } = await supabase
+                .from('subjects')
+                .select('title, grade_id')
+                .eq('id', topicData.subject_id)
+                .single();
+
+            if (subjectData) {
+                const { data: gradeData } = await supabase
+                    .from('grades')
+                    .select('name')
+                    .eq('id', subjectData.grade_id)
+                    .single();
+
+                setHierarchy({
+                    grade: gradeData?.name || 'Unknown Grade',
+                    subject: subjectData.title
+                });
+            }
         }
 
         // Fetch Lessons
@@ -36,7 +58,7 @@ function LessonContent() {
             .from('lessons')
             .select('*')
             .eq('topic_id', topicId)
-            .order('title', { ascending: true }); // Assuming title sort for now
+            .order('title', { ascending: true });
 
         if (lessonsData) {
             setLessons(lessonsData);
@@ -48,7 +70,13 @@ function LessonContent() {
         fetchLessons();
     }, [topicId]);
 
-    const handleUploadClick = () => {
+    const handleEdit = (lesson: any) => {
+        setEditingLesson(lesson);
+        setIsModalOpen(true);
+    };
+
+    const handleAddNew = () => {
+        setEditingLesson(null);
         setIsModalOpen(true);
     };
 
@@ -56,13 +84,17 @@ function LessonContent() {
         <div className="p-6 md:p-12 w-full">
             <div className="flex justify-between items-start mb-8">
                 <div>
-                    <h2 className="text-3xl font-bold text-blue-600 mb-2">{topicTitle || 'Lessons'}</h2>
-                    <p className="text-blue-500 font-medium">/Content</p>
+                    <h2 className="text-3xl font-bold text-[#267CD1] mb-2">{topicTitle || 'Lessons'}</h2>
+                    <p className="text-[#267CD1] font-medium">{hierarchy?.grade} / {hierarchy?.subject} / {topicTitle}</p>
                 </div>
 
                 <button
-                    className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-full hover:bg-blue-700 transition-colors font-medium shadow-sm hover:shadow-md"
-                    onClick={handleUploadClick}
+                    className="flex items-center gap-1 md:gap-2 bg-[#267CD1] 
+               text-white px-4 py-1.5 md:px-6 md:py-2.5 
+               text-sm md:text-base rounded-full 
+               hover:bg-blue-700 transition-colors 
+               font-medium shadow-sm hover:shadow-md"
+                    onClick={handleAddNew}
                 >
                     Upload New Lesson
                     <Plus className="w-5 h-5" strokeWidth={2.5} />
@@ -71,7 +103,11 @@ function LessonContent() {
 
             {/* Content Area */}
             {isLoading ? (
-                <div className="text-center py-20 text-gray-500">Loading lessons...</div>
+                <div className="loader-wrapper">
+                    <div className="loader">
+                        <div className="jimu-primary-loading" />
+                    </div>
+                </div>
             ) : lessons.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {lessons.map((lesson) => (
@@ -80,8 +116,8 @@ function LessonContent() {
                             id={lesson.id}
                             title={lesson.title}
                             content={lesson.content}
-                            type={lesson.media_type === 'video' ? 'video' : 'pdf'} // Map media_type to 'video' or 'pdf'
-                            onEdit={() => console.log('Edit lesson', lesson.id)}
+                            type={lesson.media_type === 'video' ? 'video' : 'pdf'}
+                            onEdit={() => handleEdit(lesson)}
                         />
                     ))}
                 </div>
@@ -96,19 +132,24 @@ function LessonContent() {
                         There are currently no lessons uploaded for this topic. Start by uploading a new lesson.
                     </p>
                     <button
-                        onClick={handleUploadClick}
+                        onClick={handleAddNew}
                         className="text-blue-600 font-medium hover:underline"
                     >
                         Upload your first lesson
                     </button>
                 </div>
             )}
+            
             {/* Modal */}
             {topicId && (
                 <CreateLessonModal
                     isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
+                    onClose={() => {
+                        setIsModalOpen(false);
+                        setEditingLesson(null);
+                    }}
                     topicId={topicId}
+                    initialData={editingLesson}
                     onSuccess={() => {
                         fetchLessons();
                     }}
@@ -127,7 +168,7 @@ export default function LessonsPage() {
             <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                 type="button"
-                className={`fixed top-4 left-4 z-50 inline-flex items-center p-2 sm:hidden bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-opacity ${isSidebarOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+                className={`fixed top-4 left-4 z-50 inline-flex items-center p-2 sm:hidden bg-[#267CD1] text-white rounded-lg hover:bg-blue-600 transition-opacity ${isSidebarOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
             >
                 <span className="sr-only">Open sidebar</span>
                 <svg

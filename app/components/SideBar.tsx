@@ -89,12 +89,12 @@ export default function Sidebar({ hideMobileButton = false, isSidebarOpen = fals
                                     : 'hover:bg-neutral-tertiary hover:text-fg-brand group'
                                     }`}
                             >
-                                <LayoutDashboard className="w-5 h-5 transition duration-75" />
-                                <span className="ms-3">Dashboard</span>
+                                <LayoutDashboard className="w-8 h-8 transition duration-75 text-[#267CD1]" />
+                                <span className="ms-3 text-[#267CD1] text-2xl">Dashboard</span>
                             </Link>
                         </li>
                         <div className='p-4'></div>
-                        {/* E-commerce Dropdown */}
+                        {/* Grades Dropdown */}
                         <li>
                             <button
                                 type="button"
@@ -102,8 +102,8 @@ export default function Sidebar({ hideMobileButton = false, isSidebarOpen = fals
                                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                             >
                                 <div className="flex items-center">
-                                    <Star className="shrink-0 w-5 h-5 transition duration-75 group-hover:text-fg-brand" />
-                                    <span className="flex-1 ms-3 text-left whitespace-nowrap">Grades</span>
+                                    <Star className="shrink-0 w-6 h-6 transition duration-75 group-hover:text-fg-brand" />
+                                    <span className="flex-1 ms-3 text-left whitespace-nowrap text-2xl d">Grades</span>
                                 </div>
                                 <ChevronDown
                                     className={`w-5 h-5 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}
@@ -120,7 +120,7 @@ export default function Sidebar({ hideMobileButton = false, isSidebarOpen = fals
                                     <li key={grade.id}>
                                         <Link
                                             href={`/grades?id=${grade.id}`}
-                                            className="flex items-center pl-10 px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
+                                            className="flex items-center pl-10 px-2 py-1.5 text-body rounded-base hover:bg-[#DBEAFE] hover:text-fg-brand group text-xl"
                                         >
                                             {grade.name}
                                         </Link>

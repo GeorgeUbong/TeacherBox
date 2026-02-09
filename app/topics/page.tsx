@@ -11,8 +11,10 @@ function TopicContent() {
     const searchParams = useSearchParams();
     const subjectId = searchParams.get('subjectId');
     const [subjectTitle, setSubjectTitle] = useState<string>('');
+    const [gradeName, setGradeName] = useState<string>('');
     const [topics, setTopics] = useState<any[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingTopic, setEditingTopic] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const supabase = createClient();
 
@@ -23,12 +25,23 @@ function TopicContent() {
         // Fetch Subject Title
         const { data: subjectData } = await supabase
             .from('subjects')
-            .select('title')
+            .select('title, grade_id')
             .eq('id', subjectId)
             .single();
 
         if (subjectData) {
             setSubjectTitle(subjectData.title);
+            
+            // Fetch Grade Information
+            const { data: gradeData } = await supabase
+                .from('grades')
+                .select('name')
+                .eq('id', subjectData.grade_id)
+                .single();
+            
+            if (gradeData) {
+                setGradeName(gradeData.name);
+            }
         }
 
         // Fetch Topics
@@ -48,17 +61,27 @@ function TopicContent() {
         fetchTopics();
     }, [subjectId]);
 
+    const handleEdit = (topic: any) => {
+        setEditingTopic(topic);
+        setIsModalOpen(true);
+    };
+
+    const handleAddNew = () => {
+        setEditingTopic(null);
+        setIsModalOpen(true);
+    };
+
     return (
         <div className="p-6 md:p-12 w-full">
             <div className="flex justify-between items-start mb-8">
                 <div>
-                    <h2 className="text-3xl font-bold text-blue-600 mb-2">{subjectTitle || 'Topics'}</h2>
-                    <p className="text-blue-500 font-medium">/Lessons</p>
+                    <h2 className="text-3xl font-bold text-[#267CD1] mb-2">{subjectTitle || 'Topics'}</h2>
+                    <p className="text-[#267CD1] font-medium">{gradeName} / {subjectTitle}</p>
                 </div>
 
                 <button
-                    className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-full hover:bg-blue-700 transition-colors font-medium shadow-sm hover:shadow-md"
-                    onClick={() => setIsModalOpen(true)}
+                    className="flex items-center gap-2 bg-[#267CD1] text-white px-6 py-2.5 rounded-full hover:bg-blue-700 transition-colors font-medium shadow-sm hover:shadow-md"
+                    onClick={handleAddNew}
                 >
                     Upload New Topic
                     <Plus className="w-5 h-5" strokeWidth={2.5} />
@@ -67,7 +90,11 @@ function TopicContent() {
 
             {/* Content Area */}
             {isLoading ? (
-                <div className="text-center py-20 text-gray-500">Loading topics...</div>
+                <div className="loader-wrapper">
+                    <div className="loader">
+                        <div className="jimu-primary-loading" />
+                    </div>
+                </div>
             ) : topics.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {topics.map((topic) => (
@@ -76,7 +103,7 @@ function TopicContent() {
                             id={topic.id}
                             title={topic.title}
                             subtopic={topic.subtopic}
-                            onEdit={() => console.log('Edit topic', topic.id)}
+                            onEdit={() => handleEdit(topic)}
                         />
                     ))}
                 </div>
@@ -91,7 +118,7 @@ function TopicContent() {
                         There are currently no topics created for this subject. Get started by uploading a new topic.
                     </p>
                     <button
-                        onClick={() => setIsModalOpen(true)}
+                        onClick={handleAddNew}
                         className="text-blue-600 font-medium hover:underline"
                     >
                         Create your first topic
@@ -102,8 +129,12 @@ function TopicContent() {
             {subjectId && (
                 <CreateTopicModal
                     isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
+                    onClose={() => {
+                        setIsModalOpen(false);
+                        setEditingTopic(null);
+                    }}
                     subjectId={subjectId}
+                    initialData={editingTopic}
                     onSuccess={() => {
                         fetchTopics();
                     }}
@@ -122,7 +153,7 @@ export default function TopicsPage() {
             <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                 type="button"
-                className={`fixed top-4 left-4 z-50 inline-flex items-center p-2 sm:hidden bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-opacity ${isSidebarOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+                className={`fixed top-4 left-4 z-50 inline-flex items-center p-2 sm:hidden bg-[#267CD1] text-white rounded-lg hover:bg-blue-600 transition-opacity ${isSidebarOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
             >
                 <span className="sr-only">Open sidebar</span>
                 <svg

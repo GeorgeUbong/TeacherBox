@@ -1,7 +1,7 @@
 import react from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Wifi, Lock, Lightbulb, Icon } from 'lucide-react';
+import { WifiOff, Lock, Lightbulb, Icon } from 'lucide-react';
 import NavBar from './components/NavBar';
 import pic from '../app/assets/childs.png';
 import Sidebar from './components/SideBar';
@@ -9,7 +9,7 @@ import Sidebar from './components/SideBar';
 export default function Home() {
   const features = [
     {
-      icon: Wifi, // Use the imported Lucide React component
+      icon: WifiOff, // Use the imported Lucide React component
       title: "Offline first",
       subtext: "Access all content without internet. Perfect for remote areas.",
       id: 1,
@@ -17,7 +17,7 @@ export default function Home() {
     {
       icon: Lightbulb, // The Lightbulb icon works well for 'Learning'
       title: "Affordable Learning",
-      subtext: "Your data stays on your device. No external servers",
+      subtext: "Locally served content, one time payment no more fees.",
       id: 2,
     },
     {
@@ -29,16 +29,17 @@ export default function Home() {
   ];
 
 
+
   return (
     <>
       <NavBar />
       <main className='bg-white min-h-screen text-black'>
         <section className="px-6 md:px-12 py-16 text-center max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-7xl font-bold mb-4 text-blue-600">Welcome To BridgeBox</h1>
-          <p className="text-gray-700 mb-8 text-lg">Designed for environments where internet is unreliable or unavailable. Deploy on a Raspberry Pi and serve education to your community.</p>
+          <h1 className="text-4xl md:text-7xl font-bold mb-8 text-[#267CD1]">Welcome To BridgeBox</h1>
+          <p className="text-gray-700 mb-8 text-xl">Designed for environments where internet is unreliable or unavailable. Deploy on a Raspberry Pi and serve education to your community.</p>
 
           <Link href="/dashboard">
-            <button className="bg-blue-500 text-white font-semibold px-8 py-3 rounded-lg hover:bg-blue-600 transition mb-12">
+            <button className="bg-blue-500 text-white font-semibold px-8 py-3 rounded-full hover:bg-white hover:text-[#267CD1] border border-[#267CD1] transition mb-12">
               Get Started
             </button>
           </Link>
@@ -53,8 +54,8 @@ export default function Home() {
         </section>
 
         <section className="px-6 md:px-12 py-16 text-center max-w-5xl mx-auto">
-          <h3 className="text-3xl md:text-4xl font-bold mb-4">Why Bridge-Box?</h3>
-          <p className="text-gray-700 mb-12 text-lg">Designed for environments where internet is unreliable or unavailable. Deploy on a Raspberry Pi and serve education to your community.</p>
+          <h3 className="text-3xl md:text-4xl font-bold mb-4 text-[#267CD1]">Why Bridge-Box?</h3>
+          <p className="text-gray-700 mb-12 text-lg md:text-xl">Designed for environments where internet is unreliable or unavailable. Deploy on a Raspberry Pi and serve education to your community.</p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {features.map((feature) => {
@@ -74,9 +75,11 @@ export default function Home() {
           <div className="bg-blue-500 rounded-3xl p-8 md:p-16 text-white text-center max-w-4xl mx-auto">
             <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to Upload learning materials?</h2>
             <p className="mb-8 text-blue-100 text-lg">Add lesson notes, PDFs, and videos for your students to access anytime.</p>
-            <button className="bg-white text-blue-500 font-bold px-8 py-3 rounded-lg hover:bg-gray-100 transition">
-              Manage Lessons
-            </button>
+            <Link href="/dashboard">
+              <button className="bg-white text-blue-500 font-bold px-8 py-3 rounded-lg hover:bg-gray-100 transition">
+                Manage Lessons
+              </button>
+            </Link>
           </div>
         </section>
       </main>

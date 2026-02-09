@@ -1,21 +1,36 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { X, ArrowRight } from 'lucide-react';
+import { X, ArrowRight, Trash2 } from 'lucide-react';
 
 interface CreateTopicModalProps {
     isOpen: boolean;
     onClose: () => void;
     subjectId: string;
     onSuccess?: () => void;
+    initialData?: {
+        id: number;
+        title: string;
+        subtopic: string;
+    } | null;
 }
 
-
-export default function CreateTopicModal({ isOpen, onClose, subjectId, onSuccess }: CreateTopicModalProps) {
+export default function CreateTopicModal({ isOpen, onClose, subjectId, onSuccess, initialData }: CreateTopicModalProps) {
     const [title, setTitle] = useState('');
     const [subtopic, setSubtopic] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const supabase = createClient();
+
+    useEffect(() => {
+        if (initialData) {
+            setTitle(initialData.title);
+            setSubtopic(initialData.subtopic);
+        } else {
+            setTitle('');
+            setSubtopic('');
+        }
+    }, [initialData, isOpen]);
 
     const handleSubmit = async () => {
         if (!title || !subtopic) {
@@ -24,24 +39,71 @@ export default function CreateTopicModal({ isOpen, onClose, subjectId, onSuccess
         }
 
         setIsLoading(true);
-        const { error } = await supabase
-            .from('topics')
-            .insert([
-                {
-                    subject_id: subjectId,
+
+        if (initialData) {
+            // Update
+            const { error } = await supabase
+                .from('topics')
+                .update({
                     title: title,
                     subtopic: subtopic
-                }
-            ]);
+                })
+                .eq('id', initialData.id);
 
-        setIsLoading(false);
+            setIsLoading(false);
+
+            if (error) {
+                console.error('Error updating topic:', error);
+                alert(`Failed to update topic: ${error.message}`);
+            } else {
+                onSuccess?.();
+                onClose();
+            }
+        } else {
+            // Insert
+            const { error } = await supabase
+                .from('topics')
+                .insert([
+                    {
+                        subject_id: subjectId,
+                        title: title,
+                        subtopic: subtopic
+                    }
+                ]);
+
+            setIsLoading(false);
+
+            if (error) {
+                console.error('Error creating topic:', error);
+                alert(`Failed to create topic: ${error.message}`);
+            } else {
+                setTitle('');
+                setSubtopic('');
+                onSuccess?.();
+                onClose();
+            }
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!initialData) return;
+        
+        if (!confirm("Are you sure you want to delete this topic? This will also delete all associated lessons and assessments.")) {
+            return;
+        }
+
+        setIsDeleting(true);
+        const { error } = await supabase
+            .from('topics')
+            .delete()
+            .eq('id', initialData.id);
+
+        setIsDeleting(false);
 
         if (error) {
-            console.error('Error creating topic:', error);
-            alert(`Failed to create topic: ${error.message}`);
+            console.error('Error deleting topic:', error);
+            alert(`Failed to delete topic: ${error.message}`);
         } else {
-            setTitle('');
-            setSubtopic('');
             onSuccess?.();
             onClose();
         }
@@ -55,12 +117,24 @@ export default function CreateTopicModal({ isOpen, onClose, subjectId, onSuccess
                 <div className="p-6 pb-2">
                     <div className="flex justify-between items-center mb-6">
                         <div className="bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1">
-                            New Topic
+                            {initialData ? 'Edit Topic' : 'New Topic'}
                             <ArrowRight className="w-3 h-3" />
                         </div>
+                        {initialData && (
+                            <button 
+                                onClick={handleDelete}
+                                disabled={isDeleting}
+                                className="text-red-500 hover:bg-red-50 p-2 rounded-full transition-colors flex items-center gap-1 text-xs font-bold"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                                {isDeleting ? 'Deleting...' : 'Delete'}
+                            </button>
+                        )}
                     </div>
 
-                    <h2 className="text-2xl font-bold text-black mb-6">Create Topic</h2>
+                    <h2 className="text-2xl font-bold text-black mb-6">
+                        {initialData ? 'Update Topic' : 'Create Topic'}
+                    </h2>
 
                     <div className="space-y-4">
                         <div>
@@ -90,7 +164,7 @@ export default function CreateTopicModal({ isOpen, onClose, subjectId, onSuccess
                 <div className="p-6 pt-4 flex gap-4 justify-center">
                     <button
                         onClick={handleSubmit}
-                        disabled={isLoading}
+                        disabled={isLoading || isDeleting}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-2.5 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                     >
                         {isLoading ? 'Saving...' : 'Save Changes'}

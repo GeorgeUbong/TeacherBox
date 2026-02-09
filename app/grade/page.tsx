@@ -76,7 +76,7 @@ export default function GradePage() {
             <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                 type="button"
-                className={`fixed top-4 left-4 z-50 inline-flex items-center p-2 sm:hidden bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-opacity ${isSidebarOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+                className={`fixed top-4 left-4 z-50 inline-flex items-center p-2 sm:hidden bg-[#267CD1] text-white rounded-lg hover:bg-blue-600 transition-opacity ${isSidebarOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
             >
                 <span className="sr-only">Open sidebar</span>
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -115,7 +115,11 @@ export default function GradePage() {
                 </div>
 
                 {loading ? (
-                    <div className="text-center py-10">Loading grades...</div>
+                    <div className="loader-wrapper">
+                        <div className="loader">
+                            <div className="jimu-primary-loading" />
+                        </div>
+                    </div>
                 ) : error ? (
                     <div className="text-center py-10 text-red-500">{error}</div>
                 ) : (
