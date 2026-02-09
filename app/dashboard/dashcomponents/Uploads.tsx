@@ -52,7 +52,11 @@ export default function LessonUp({ totalLessons }: { totalLessons: number }) {
     }, []);
 
     return (
-        <div className="bg-[#2B7FFF] text-white rounded-2xl p-8 shadow-lg h-full flex flex-col">
+        <div className="bg-[#2B7FFF] text-white rounded-2xl shadow-lg 
+  p-6 md:p-10 
+  min-h-[300px] md:h-full 
+  flex flex-col justify-between
+  w-full max-w-sm md:max-w-full">
             <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold">Lessons Uploaded</h3>
                 <FileText className="w-8 h-8 text-blue-100" />

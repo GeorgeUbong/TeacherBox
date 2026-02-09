@@ -1,4 +1,3 @@
-// components/Sidebar.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -9,7 +8,7 @@ import {
     Star,
     ChevronDown,
     X,
-
+    BookOpen
 } from 'lucide-react';
 import Image from 'next/image';
 import img from '../assets/logo.png'
@@ -21,22 +20,39 @@ export default function Sidebar({ hideMobileButton = false, isSidebarOpen = fals
     const pathname = usePathname()
     const supabase = createClient()
 
-    useEffect(() => {
-        const fetchGrades = async () => {
-            const { data, error } = await supabase
-                .from('grades')
-                .select('*')
-                .order('order_index', { ascending: true })
-            if (data) {
-                setGrades(data)
-            }
+    const fetchGrades = async () => {
+        const { data, error } = await supabase
+            .from('grades')
+            .select('*')
+            .order('created_at', { ascending: true }) // Updated sorting here
+        if (data) {
+            setGrades(data)
         }
+    }
+
+    useEffect(() => {
         fetchGrades()
+
+        // Realtime listener: Updates sidebar immediately when grades are added/deleted elsewhere
+        const channel = supabase
+            .channel('sidebar-sync')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'grades' },
+                () => {
+                    fetchGrades()
+                }
+            )
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(channel)
+        }
     }, [])
 
     return (
         <>
-            {/* Mobile Hamburger Button - hidden if managed by parent */}
+            {/* Mobile Hamburger Button */}
             {!hideMobileButton && (
                 <button
                     onClick={() => setIsSidebarOpen?.(!isSidebarOpen)}
@@ -62,39 +78,60 @@ export default function Sidebar({ hideMobileButton = false, isSidebarOpen = fals
                 </button>
             )}
 
-            {/* Sidebar */}
-
-
             <aside
                 id="sidebar-multi-level-sidebar"
                 className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform bg-white text-[#267CD1] border-r border-default ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} sm:translate-x-0`}
                 aria-label="Sidebar"
             >
-                <div className="h-full px-3 py-4 overflow-hidden flex flex-col">
+                <div className="h-full px-3 py-4 overflow-y-auto flex flex-col">
                     <ul className="space-y-2 font-medium">
-                        <Link href={'/'}>
-                            <Image
-                                alt='logo'
-                                className='pb-10'
-                                src={img}
-                                height={200}
-                                width={200}
-                            /></Link>
+                        <li>
+                            <Link href={'/'} onClick={() => setIsSidebarOpen?.(false)}>
+                                <Image
+                                    alt='logo'
+                                    className='pb-10 mx-auto'
+                                    src={img}
+                                    height={200}
+                                    width={200}
+                                />
+                            </Link>
+                        </li>
+
                         {/* Dashboard */}
                         <li>
                             <Link
                                 href="/dashboard"
-                                className={`flex items-center px-2 py-1.5 text-body rounded-base transition-colors ${pathname === '/dashboard'
-                                    ? 'bg-blue-100 text-blue-600 font-semibold'
-                                    : 'hover:bg-neutral-tertiary hover:text-fg-brand group'
+                                onClick={() => setIsSidebarOpen?.(false)}
+                                className={`flex items-center px-2 py-1.5 text-body rounded-base 
+                                    transition-colors ${pathname === '/dashboard'
+                                    ? 'bg-blue-100 text-blue-600 '
+                                    : 'hover:bg-blue-100 hover:text-fg-brand group'
                                     }`}
                             >
                                 <LayoutDashboard className="w-8 h-8 transition duration-75 text-[#267CD1]" />
                                 <span className="ms-3 text-[#267CD1] text-2xl">Dashboard</span>
                             </Link>
                         </li>
+
                         <div className='p-4'></div>
-                        {/* Grades Dropdown */}
+
+                        {/* Manage Grades Page */}
+                        <li>
+                            <Link
+                                href="/grade"
+                                onClick={() => setIsSidebarOpen?.(false)}
+                                className={`flex items-center mb-12 px-2 py-1.5 text-body 
+                                    rounded-base transition-colors ${pathname === '/grade'
+                                    ? 'bg-blue-100 text-blue-600'
+                                    : 'hover:bg-blue-100 hover:text-fg-brand group'
+                                    }`}
+                            >
+                                <BookOpen className="w-6 h-6 transition duration-75 text-[#267CD1]" />
+                                <span className="ms-3 text-[#267CD1] text-xl">Grade Manager</span>
+                            </Link>
+                        </li> 
+
+                        {/* Grades Dropdown List */}
                         <li>
                             <button
                                 type="button"
@@ -103,24 +140,22 @@ export default function Sidebar({ hideMobileButton = false, isSidebarOpen = fals
                             >
                                 <div className="flex items-center">
                                     <Star className="shrink-0 w-6 h-6 transition duration-75 group-hover:text-fg-brand" />
-                                    <span className="flex-1 ms-3 text-left whitespace-nowrap text-2xl d">Grades</span>
+                                    <span className="flex-1 ms-3 text-left whitespace-nowrap text-2xl">Grades</span>
                                 </div>
                                 <ChevronDown
                                     className={`w-5 h-5 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}
                                 />
                             </button>
 
-                            {/* Dropdown content */}
-                            <ul
-                                id="dropdown-example"
-                                className={`py-2 space-y-2 ${isDropdownOpen ? 'block' : 'hidden'}`}
-                            >
-
+                            <ul className={`py-2 space-y-2 ${isDropdownOpen ? 'block' : 'hidden'}`}>
                                 {grades.map((grade) => (
                                     <li key={grade.id}>
                                         <Link
                                             href={`/grades?id=${grade.id}`}
-                                            className="flex items-center pl-10 px-2 py-1.5 text-body rounded-base hover:bg-[#DBEAFE] hover:text-fg-brand group text-xl"
+                                            onClick={() => setIsSidebarOpen?.(false)}
+                                            className={`flex items-center pl-10 px-2 py-1.5 rounded-base hover:bg-[#DBEAFE] hover:text-fg-brand group text-xl transition-colors ${
+                                                pathname.includes(grade.id) ? 'text-blue-700 font-bold bg-blue-50' : 'text-[#267CD1]'
+                                            }`}
                                         >
                                             {grade.name}
                                         </Link>
@@ -128,8 +163,6 @@ export default function Sidebar({ hideMobileButton = false, isSidebarOpen = fals
                                 ))}
                             </ul>
                         </li>
-
-
                     </ul>
                 </div>
             </aside>

@@ -38,8 +38,9 @@ export default function Home() {
           <h1 className="text-4xl md:text-7xl font-bold mb-8 text-[#267CD1]">Welcome To BridgeBox</h1>
           <p className="text-gray-700 mb-8 text-xl">Designed for environments where internet is unreliable or unavailable. Deploy on a Raspberry Pi and serve education to your community.</p>
 
-          <Link href="/dashboard">
-            <button className="bg-blue-500 text-white font-semibold px-8 py-3 rounded-full hover:bg-white hover:text-[#267CD1] border border-[#267CD1] transition mb-12">
+          <Link href="/Auth">
+            <button className="bg-blue-500 text-white font-semibold
+             px-8 py-3 rounded-full hover:bg-white hover:text-[#267CD1] border border-[#267CD1] transition mb-12">
               Get Started
             </button>
           </Link>
